@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Angular Inspector</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 280px;
+      background: #0f0f13;
+      color: #e2e8f0;
+      font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #dd0031 0%, #c3002f 100%);
+      padding: 16px 18px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header svg {
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .header-text p {
+      font-size: 10px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 1px;
+    }
+
+    .badge {
+      margin-left: auto;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    .section {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .section-title {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .shortcut-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .shortcut-row:last-child { margin-bottom: 0; }
+
+    .shortcut-desc {
+      font-size: 12px;
+      color: #94a3b8;
+      flex: 1;
+    }
+
+    .keys {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+
+    kbd {
+      background: #1e2030;
+      border: 1px solid #334155;
+      border-bottom: 2px solid #334155;
+      color: #cbd5e1;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .plus {
+      color: #475569;
+      font-size: 11px;
+    }
+
+    .tip {
+      padding: 10px 18px 14px;
+      font-size: 11px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .tip strong {
+      color: #dd0031;
+    }
+
+    .footer {
+      padding: 8px 18px;
+      background: rgba(221,0,49,0.05);
+      border-top: 1px solid rgba(221,0,49,0.1);
+      font-size: 10px;
+      color: #334155;
+      text-align: center;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      margin-right: 4px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <!-- Angular logo mark -->
+    <svg width="28" height="28" viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="125,30 232,66.9 215.2,194.7 125,235 34.8,194.7 18,66.9" fill="rgba(255,255,255,0.15)"/>
+      <polygon points="125,30 125,235 215.2,194.7 232,66.9" fill="rgba(255,255,255,0.1)"/>
+      <polygon points="125,52.1 61.8,182.6 86.9,182.6 99.2,152.6 150.4,152.6 162.7,182.6 187.8,182.6" fill="white"/>
+      <polygon points="125,104.6 142.1,140.2 107.9,140.2" fill="#dd0031"/>
+    </svg>
+    <div class="header-text">
+      <h1>Angular Inspector</h1>
+      <p>Component DevTools</p>
+    </div>
+    <span class="badge">v1.0</span>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Shortcuts</div>
+
+    <div class="shortcut-row">
+      <span class="shortcut-desc">Highlight component</span>
+      <div class="keys">
+        <kbd>Ctrl</kbd>
+        <span class="plus">+</span>
+        <kbd>Hover</kbd>
+      </div>
+    </div>
+
+    <div class="shortcut-row">
+      <span class="shortcut-desc">Log component details</span>
+      <div class="keys">
+        <kbd>Ctrl</kbd>
+        <span class="plus">+</span>
+        <kbd>Click</kbd>
+      </div>
+    </div>
+
+    <div class="shortcut-row">
+      <span class="shortcut-desc">Disable inspector</span>
+      <div class="keys">
+        <kbd>Release Ctrl</kbd>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Console Access</div>
+    <div class="shortcut-row">
+      <span class="shortcut-desc">Component instance</span>
+      <div class="keys"><kbd>$ngComponent</kbd></div>
+    </div>
+    <div class="shortcut-row">
+      <span class="shortcut-desc">DOM element</span>
+      <div class="keys"><kbd>$ngElement</kbd></div>
+    </div>
+    <div class="shortcut-row">
+      <span class="shortcut-desc">Metadata (ɵcmp)</span>
+      <div class="keys"><kbd>$ngMeta</kbd></div>
+    </div>
+  </div>
+
+  <div class="tip">
+    Works with <strong>Angular Ivy</strong> (v9+) and <strong>ViewEngine</strong>.<br>
+    Open <strong>DevTools Console</strong> (F12) to see component logs.
+  </div>
+
+  <div class="footer">
+    <span class="status-dot"></span>Inspector active on this tab
+  </div>
+</body>
+</html>

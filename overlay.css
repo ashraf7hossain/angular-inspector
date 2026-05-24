@@ -1,0 +1,51 @@
+/* Angular Component Inspector — Overlay Styles */
+
+/* Highlight ring on Ctrl+Hover */
+.__ng-inspector-highlight__ {
+  outline: 2px solid #dd0031 !important;
+  outline-offset: 1px !important;
+  background-color: rgba(221, 0, 49, 0.04) !important;
+  transition: outline 0.08s ease, background-color 0.08s ease !important;
+  position: relative !important;
+}
+
+/* Inspector-active cursor hint */
+.__ng-inspector-active__ * {
+  cursor: crosshair !important;
+}
+
+/* Floating selector label */
+#__ng-inspector-label__ {
+  position: absolute !important;
+  display: none !important;
+  z-index: 2147483647 !important;
+  transform: translateX(-50%) translateY(-100%) !important;
+  margin-top: -4px !important;
+  padding: 3px 9px 3px 7px !important;
+  background: #dd0031 !important;
+  color: #ffffff !important;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', monospace !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  border-radius: 4px 4px 4px 0 !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  box-shadow:
+    0 2px 8px rgba(221, 0, 49, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  line-height: 1.5 !important;
+  user-select: none !important;
+}
+
+/* Small arrow / notch pointing down */
+#__ng-inspector-label__::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -5px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  border-left: 5px solid transparent !important;
+  border-right: 5px solid transparent !important;
+  border-top: 5px solid #dd0031 !important;
+}
