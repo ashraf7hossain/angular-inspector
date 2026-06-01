@@ -4,6 +4,8 @@
  * Ctrl+Click: logs full component details to console
  */
 
+ import { getComponentFilePath, getComponentFilePathBySelector } from "./ng-helper.js";
+
 (function () {
   "use strict";
 
@@ -190,6 +192,8 @@
 
       // Also try ɵfac, ɵdir
       const dir = componentInstance.constructor?.ɵdir;
+      const filePath = getComponentFilePathByComponent(componentInstance);
+      console.log("filePath => ", filePath);
       if (dir) return dir;
     } catch (_) {}
     return null;

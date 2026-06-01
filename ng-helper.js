@@ -47,3 +47,49 @@
     }
     return null;
   }
+
+  export function getComponentFilePath(component) {
+    if (!component) return null;
+
+    // Try Angular debug info (Angular 17+)
+    if (component.constructor?.ɵcmp?.debugInfo) {
+      return component.constructor.ɵcmp.debugInfo;
+    }
+
+    // Try source map via fake error
+    const ctor = component.constructor;
+    const _orig = ctor;
+    let filePath = null;
+
+    try {
+      const scriptURL = new Error().stack;
+      console.log(scriptURL);
+    } catch(e) {}
+
+    return filePath;
+  }
+
+export  function getComponentFilePathBySelector(selector) {
+    const el = document.querySelector(selector)
+    const comp = window.ng.getComponent(el)
+    const ctor = comp.constructor
+
+    // Get source location from constructor
+    const fnString = ctor.toString()
+
+    // Try Angular debug info (Angular 17+)
+    if (ctor.ɵcmp?.debugInfo) {
+      return ctor.ɵcmp.debugInfo
+    }
+
+    // Try source map via fake error
+    const _orig = ctor
+    let filePath = null
+
+    try {
+      const scriptURL = new Error().stack
+      console.log(scriptURL)
+    } catch(e) {}
+
+    return filePath
+  }
