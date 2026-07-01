@@ -1,95 +1,69 @@
+function getNgContext(element) {
+  if (!element) return null;
 
+  try {
+    const ctx = window.ng?.getContext?.(element);
+    if (ctx) return ctx;
+  } catch (_) {}
 
- export function getNgContext(element) {
-    if (!element) return null;
+  try {
+    const debugEl = window.ng?.getComponent?.(element);
+    if (debugEl) return debugEl;
+  } catch (_) {}
 
-    // Angular Ivy (v9+)
+  return null;
+}
+
+function getComponentFromElement(element) {
+  if (
+    !element ||
+    element === document.body ||
+    element === document.documentElement
+  )
+    return null;
+
+  let el = element;
+  while (el && el !== document.documentElement) {
     try {
-      const ctx = window.ng?.getContext?.(element);
-      console.log("ctx => ", ctx);
-      if (ctx) return ctx;
+      const component = window.ng?.getComponent?.(el);
+      if (component) return { element: el, component, type: "ivy" };
     } catch (_) {}
 
-    // Angular Ivy debug element
-    try {
-      const debugEl = window.ng?.getComponent?.(element);
-      if (debugEl) return debugEl;
-    } catch (_) {}
-
-    return null;
-  }
-
-  export function getComponentFromElement(element) {
-    if (!element || element === document.body || element === document.documentElement) return null;
-
-    // Walk up the DOM to find the nearest Angular component
-    let el = element;
-    while (el && el !== document.documentElement) {
-      // Check for Ivy component
-      try {
-        const component = window.ng?.getComponent?.(el);
-        if (component) return { element: el, component, type: 'ivy' };
-      } catch (_) {}
-
-      // Check for __ngContext__ (Ivy internal)
-      if (el.__ngContext__ !== undefined) {
-        return { element: el, component: el.__ngContext__, type: 'ivy-context' };
-      }
-
-      // Angular ViewEngine (v2–v8) via ng-reflect or __ngContext
-      if (el.constructor && el.constructor.name && el.constructor.name !== 'HTMLElement'
-        && el.constructor.name !== 'HTMLDivElement'
-        && !el.constructor.name.startsWith('HTML')) {
-        // Might be a component
-      }
-
-      el = el.parentElement;
-    }
-    return null;
-  }
-
-  export function getComponentFilePath(component) {
-    if (!component) return null;
-
-    // Try Angular debug info (Angular 17+)
-    if (component.constructor?.ɵcmp?.debugInfo) {
-      return component.constructor.ɵcmp.debugInfo;
+    if (el.__ngContext__ !== undefined) {
+      return { element: el, component: el.__ngContext__, type: "ivy-context" };
     }
 
-    // Try source map via fake error
-    const ctor = component.constructor;
-    const _orig = ctor;
-    let filePath = null;
+    el = el.parentElement;
+  }
+  return null;
+}
 
-    try {
-      const scriptURL = new Error().stack;
-      console.log(scriptURL);
-    } catch(e) {}
+function getComponentFilePath(component) {
+  if (!component) return null;
 
-    return filePath;
+  if (component.constructor?.ɵcmp?.debugInfo) {
+    return component.constructor.ɵcmp.debugInfo;
   }
 
-export  function getComponentFilePathBySelector(selector) {
-    const el = document.querySelector(selector)
-    const comp = window.ng.getComponent(el)
-    const ctor = comp.constructor
+  return null;
+}
 
-    // Get source location from constructor
-    const fnString = ctor.toString()
+function getComponentFilePathBySelector(selector) {
+  if (!selector || !window.ng) return null;
 
-    // Try Angular debug info (Angular 17+)
+  try {
+    const el = document.querySelector(selector);
+    if (!el) return null;
+
+    const comp = window.ng.getComponent(el);
+    if (!comp) return null;
+
+    const ctor = comp.constructor;
+
     if (ctor.ɵcmp?.debugInfo) {
-      return ctor.ɵcmp.debugInfo
+      return ctor.ɵcmp.debugInfo;
     }
+  } catch (_) {}
 
-    // Try source map via fake error
-    const _orig = ctor
-    let filePath = null
-
-    try {
-      const scriptURL = new Error().stack
-      console.log(scriptURL)
-    } catch(e) {}
-
-    return filePath
-  }
+  return null;
+}

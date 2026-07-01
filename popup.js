@@ -1,9 +1,10 @@
-const STORAGE_KEYS = ["projectRoot", "ide"];
 const DEFAULT_IDE = "vscode";
 
 const projectRootInput = document.getElementById("projectRoot");
 const ideSelect = document.getElementById("ide");
 const saveStatus = document.getElementById("saveStatus");
+
+let saveTimer = null;
 
 function showStatus(text, isError = false) {
   if (!saveStatus) return;
@@ -28,10 +29,12 @@ function saveSettings() {
       return;
     }
     showStatus("Saved");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => showStatus(""), 2000);
   });
 }
 
-projectRootInput?.addEventListener("change", saveSettings);
+projectRootInput?.addEventListener("input", saveSettings);
 projectRootInput?.addEventListener("blur", saveSettings);
 ideSelect?.addEventListener("change", saveSettings);
 

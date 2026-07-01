@@ -1,40 +1,40 @@
-/**
- * Opens component source files in the user's IDE via custom protocol URLs.
- */
+// background.js
 
-const DEFAULT_IDE = "vscode";
+const IDE_URL_BUILDERS = {
+  vscode: (filePath, line, column) =>
+    `vscode://file/${filePath}:${line}:${column}`,
+  vscodium: (filePath, line, column) =>
+    `vscodium://file/${filePath}:${line}:${column}`,
+  cursor: (filePath, line, column) =>
+    `cursor://file/${filePath}:${line}:${column}`,
+  webstorm: (filePath, line) =>
+    `webstorm://open?file=${encodeURIComponent(filePath)}&line=${line}`,
+};
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type !== "OPEN_IN_IDE") {
-    return false;
-  }
-
-  const { url } = message;
-  if (!url) {
-    sendResponse({ ok: false, error: "Missing IDE URL" });
-    return false;
-  }
-
-  chrome.tabs.create({ url, active: true }, (tab) => {
-    if (chrome.runtime.lastError) {
-      sendResponse({ ok: false, error: chrome.runtime.lastError.message });
-      return;
-    }
-    sendResponse({ ok: true, tabId: tab?.id });
-  });
-
-  return true;
-});
+function buildIdeUrl(ide, filePath, line, column) {
+  const builder = IDE_URL_BUILDERS[ide] || IDE_URL_BUILDERS.vscode;
+  return builder(filePath, line, column);
+}
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type !== "GET_SETTINGS") {
-    return false;
+  if (message.type !== "OPEN_IN_IDE") return;
+
+  const ide = message.ide || "vscode";
+  const filePath = String(message.filePath || "").replace(/\\/g, "/");
+  const line = message.line || 1;
+  const column = message.column || 1;
+
+  if (!filePath) {
+    sendResponse({ ok: false, error: "No file path" });
+    return;
   }
 
-  chrome.storage.sync.get({ projectRoot: "", ide: DEFAULT_IDE }, (items) => {
+  const url = buildIdeUrl(ide, filePath, line, column);
+
+  chrome.tabs.create({ url, active: false }, () => {
     sendResponse({
-      projectRoot: items.projectRoot || "",
-      ide: items.ide || DEFAULT_IDE,
+      ok: !chrome.runtime.lastError,
+      error: chrome.runtime.lastError?.message,
     });
   });
 

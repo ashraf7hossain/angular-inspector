@@ -3,13 +3,22 @@
   "name": "Angular Component Inspector",
   "version": "1.0.0",
   "description": "Inspect Angular components by hovering with Ctrl. See component selectors and details.",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["path-utils.js", "bridge.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["ng-helper.js", "content.js"],
       "css": ["overlay.css"],
+      "world": "MAIN",
       "run_at": "document_idle"
     }
   ],

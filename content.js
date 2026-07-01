@@ -4,8 +4,6 @@
  * Ctrl+Click: logs full component details to console
  */
 
- import { getComponentFilePath, getComponentFilePathBySelector } from "./ng-helper.js";
-
 (function () {
   "use strict";
 
@@ -32,7 +30,6 @@
     // Angular Ivy (v9+)
     try {
       const ctx = window.ng?.getContext?.(element);
-      console.log("ctx => ", ctx);
       if (ctx) return ctx;
     } catch (_) {}
 
@@ -118,8 +115,6 @@
       try {
         const ctx = el.__ngContext__;
         if (ctx) {
-          console.log("ctx => ", ctx);
-          console.log("context =>", getNgContext(el));
           // LView[8] is typically the component definition (tView.data)
           if (Array.isArray(ctx)) {
             const tView = ctx[1]; // TView
@@ -192,7 +187,7 @@
 
       // Also try ɵfac, ɵdir
       const dir = componentInstance.constructor?.ɵdir;
-      const filePath = getComponentFilePathByComponent(componentInstance);
+      const filePath = getComponentFilePath(componentInstance);
       console.log("filePath => ", filePath);
       if (dir) return dir;
     } catch (_) {}
@@ -265,6 +260,8 @@
     Array.from(element?.attributes || []).forEach((attr) => {
       details.attributes[attr.name] = attr.value;
     });
+
+    openComponentInIde(selector);
     console.log(element);
 
     return details;
@@ -274,6 +271,17 @@
     if (!io) return {};
     if (typeof io === "object" && !Array.isArray(io)) return io;
     return io;
+  }
+
+  function openComponentInIde(selector) {
+    const debugInfo = getComponentFilePathBySelector(selector);
+    if (!debugInfo) return;
+
+    window.dispatchEvent(
+      new CustomEvent("__ng-inspector:open-in-ide__", {
+        detail: { debugInfo },
+      }),
+    );
   }
 
   // ─── Overlay ────────────────────────────────────────────────────────────────
@@ -369,11 +377,11 @@
 
       const selectorInfo = getComponentSelector(target);
 
-      console.log("element contenxt", getNgContext(selectorInfo.element));
-      console.log(
-        "element component",
-        getComponentFromElement(selectorInfo.element),
-      );
+      // console.log("element contenxt", getNgContext(selectorInfo.element));
+      // console.log(
+      //   "element component",
+      //   getComponentFromElement(selectorInfo.element),
+      // );
 
       if (selectorInfo) {
         showHighlight(selectorInfo.element, selectorInfo);
@@ -530,7 +538,6 @@
       window.$ngElement = selectorInfo.element;
       window.$ngMeta = selectorInfo.meta;
       // console.log('%c💡 Tip', 'color:#94a3b8;font-style:italic;', 'Access component via window.$ngComponent, element via window.$ngElement, metadata via window.$ngMeta');
-      console.log("element => ", window.$ngComponent);
       console.log("element => ", selectorInfo);
 
       console.groupEnd();
