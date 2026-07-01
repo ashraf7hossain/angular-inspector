@@ -261,8 +261,7 @@
       details.attributes[attr.name] = attr.value;
     });
 
-    openComponentInIde(selector);
-    console.log(element);
+    openComponentInIde(selector, element);
 
     return details;
   }
@@ -273,8 +272,12 @@
     return io;
   }
 
-  function openComponentInIde(selector) {
-    const debugInfo = getComponentFilePathBySelector(selector);
+  function openComponentInIde(selector, element) {
+    let debugInfo = getComponentFilePathBySelector(selector);
+    if (!debugInfo && element) {
+      debugInfo = getDebugInfoFromElement(element);
+    }
+    console.log("[Angular Inspector] debugInfo:", debugInfo, element);
     if (!debugInfo) return;
 
     window.dispatchEvent(

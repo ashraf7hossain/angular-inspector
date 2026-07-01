@@ -24,12 +24,20 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   const line = message.line || 1;
   const column = message.column || 1;
 
+  console.log("[Angular Inspector] opening in IDE:", {
+    ide,
+    filePath,
+    line,
+    column,
+  });
+
   if (!filePath) {
     sendResponse({ ok: false, error: "No file path" });
     return;
   }
 
   const url = buildIdeUrl(ide, filePath, line, column);
+  console.log("[Angular Inspector] IDE URL:", url);
 
   chrome.tabs.create({ url, active: false }, () => {
     sendResponse({

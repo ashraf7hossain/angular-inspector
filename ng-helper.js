@@ -55,15 +55,23 @@ function getComponentFilePathBySelector(selector) {
     const el = document.querySelector(selector);
     if (!el) return null;
 
-    const comp = window.ng.getComponent(el);
-    if (!comp) return null;
-
-    const ctor = comp.constructor;
-
-    if (ctor.ɵcmp?.debugInfo) {
-      return ctor.ɵcmp.debugInfo;
-    }
+    return getComponentFilePath(window.ng.getComponent(el));
   } catch (_) {}
+
+  return null;
+}
+
+function getDebugInfoFromElement(element) {
+  if (!element || !window.ng) return null;
+
+  let el = element;
+  while (el && el !== document.documentElement) {
+    try {
+      const debugInfo = getComponentFilePath(window.ng.getComponent(el));
+      if (debugInfo) return debugInfo;
+    } catch (_) {}
+    el = el.parentElement;
+  }
 
   return null;
 }

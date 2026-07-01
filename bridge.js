@@ -7,6 +7,21 @@ window.addEventListener(OPEN_IDE_EVENT, (event) => {
 
   chrome.storage.sync.get({ projectRoot: "", ide: "vscode" }, (items) => {
     const resolved = resolveDebugInfoPath(debugInfo, items.projectRoot);
+
+    console.log("[Angular Inspector] debugInfo path:", debugInfo);
+    console.log(
+      "[Angular Inspector] project root:",
+      items.projectRoot || "(not set)",
+    );
+    if (resolved) {
+      console.log(
+        "[Angular Inspector] final path:",
+        `${resolved.filePath}:${resolved.line}:${resolved.column}`,
+      );
+    } else {
+      console.log("[Angular Inspector] final path: (could not resolve)");
+    }
+
     if (!resolved) return;
 
     chrome.runtime.sendMessage({
