@@ -7,6 +7,8 @@
 (function () {
   "use strict";
 
+  if (window.name === "webpack-dev-server-client-overlay") return;
+
   let currentHighlighted = null;
   let overlayLabel = null;
   let isCtrlDown = false;

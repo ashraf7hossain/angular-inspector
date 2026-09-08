@@ -5,6 +5,95 @@ function normalizePath(path) {
     .replace(/\/+$/, "");
 }
 
+const SOURCE_FILE_EXT =
+  "ts|tsx|js|jsx|mjs|cjs|html|htm|scss|sass|less|css|json|vue|md";
+
+const FILE_LOCATION_RE = new RegExp(
+  "(?:file://|webpack://\\./)?" +
+    "(" +
+    "(?:" +
+    "[a-zA-Z]:[/\\\\]|" +
+    "/" +
+    ")?" +
+    "(?:[.]{1,2}[/\\\\])?" +
+    "(?:[\\w.-]+[/\\\\])*" +
+    `[\\w.-]+\\.(?:${SOURCE_FILE_EXT})` +
+    ")" +
+    ":(\\d+)(?::(\\d+))?",
+  "i",
+);
+
+function parseFileLocation(text) {
+  if (!text || typeof text !== "string") return null;
+
+  const match = FILE_LOCATION_RE.exec(text.trim());
+  if (!match) return null;
+
+  let filePath = match[1].replace(/\\/g, "/");
+  if (filePath.startsWith("./")) {
+    filePath = filePath.slice(2);
+  }
+
+  return {
+    filePath,
+    line: parseInt(match[2], 10) || 1,
+    column: parseInt(match[3], 10) || 1,
+  };
+}
+
+function findFileLocationAtPoint(x, y) {
+  const range =
+    document.caretRangeFromPoint?.(x, y) ||
+    (() => {
+      const pos = document.caretPositionFromPoint?.(x, y);
+      if (!pos) return null;
+      const r = document.createRange();
+      r.setStart(pos.offsetNode, pos.offset);
+      r.setEnd(pos.offsetNode, pos.offset);
+      return r;
+    })();
+
+  if (!range) return null;
+
+  const container =
+    range.startContainer.nodeType === Node.TEXT_NODE
+      ? range.startContainer.parentElement
+      : range.startContainer;
+
+  if (!container) return null;
+
+  const block =
+    container.closest?.("pre, code, a.file-link, [data-can-open]") || container;
+  const text = block.textContent || "";
+  if (!text) return null;
+
+  if (range.startContainer.nodeType === Node.TEXT_NODE) {
+    let offset = 0;
+    const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node === range.startContainer) {
+        offset += range.startOffset;
+        break;
+      }
+      offset += node.textContent.length;
+    }
+
+    const lines = text.split("\n");
+    let charCount = 0;
+    for (const line of lines) {
+      const lineEnd = charCount + line.length;
+      if (offset >= charCount && offset <= lineEnd) {
+        const parsed = parseFileLocation(line);
+        if (parsed) return parsed;
+      }
+      charCount = lineEnd + 1;
+    }
+  }
+
+  return parseFileLocation(text);
+}
+
 function isAbsolutePath(path) {
   return /^[a-zA-Z]:\//.test(path) || path.startsWith("/");
 }
@@ -47,7 +136,14 @@ function resolveDebugInfoPath(debugInfo, projectRoot) {
   let column = 1;
 
   if (typeof debugInfo === "string") {
-    filePath = debugInfo;
+    const parsed = parseFileLocation(debugInfo);
+    if (parsed) {
+      filePath = parsed.filePath;
+      line = parsed.line;
+      column = parsed.column;
+    } else {
+      filePath = debugInfo;
+    }
   } else if (typeof debugInfo === "object") {
     filePath =
       debugInfo.filePath ||
